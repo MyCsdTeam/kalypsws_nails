@@ -12,7 +12,7 @@
 
     <!-- 1. IMAGEVIEW ΣΕ ΚΥΚΛΟ (Μεγαλύτερο Μέγεθος: 220dp) -->
     <androidx.cardview.widget.CardView
-        android:layout_width="350dp"
+        android:layout_width="340dp"
         android:layout_height="350dp"
         android:layout_marginBottom="16dp"
         app:cardCornerRadius="110dp"
