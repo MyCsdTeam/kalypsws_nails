@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="16dp">
+    <!-- Πρόσθεσε εδώ το background σου, π.χ. android:background="@color/my_background_color" -->
+
+    <!-- Κουμπί Back Πάνω Δεξιά -->
+    <Button
+        android:id="@+id/btnBackLogin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentTop="true"
+        android:text="Back" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_centerInParent="true"
+        android:gravity="center">
+
+        <!-- Λογότυπο -->
+        <ImageView
+            android:id="@+id/ivLogoLogin"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:src="@drawable/kalypsws_nails_logo"
+            android:layout_marginBottom="32dp" />
+
+        <!-- Πεδίο Username -->
+        <EditText
+            android:id="@+id/etUsernameLogin"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Username"
+            android:inputType="text"
+            android:layout_marginBottom="16dp" />
+
+        <!-- Πεδίο Password -->
+        <EditText
+            android:id="@+id/etPasswordLogin"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:hint="Password"
+            android:inputType="textPassword"
+            android:layout_marginBottom="24dp" />
+
+        <!-- Κουμπί Login -->
+        <Button
+            android:id="@+id/btnLoginSubmit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Login" />
+    </LinearLayout>
+</RelativeLayout>
