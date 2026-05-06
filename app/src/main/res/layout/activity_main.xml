@@ -18,8 +18,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:text="Sign Up"
-        android:textColor="#FF66B2"
-        app:strokeColor="#FF66B2"
+        android:textColor="#E8C6C6"
+        app:strokeColor="#E8C6C6"
         app:strokeWidth="1.5dp"
         app:backgroundTint="#000000"
         app:layout_constraintEnd_toEndOf="parent"
@@ -32,8 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:text="Login"
-        android:textColor="#FF66B2"
-        app:strokeColor="#FF66B2"
+        android:textColor="#E8C6C6"
+        app:strokeColor="#E8C6C6"
         app:strokeWidth="1.5dp"
         app:backgroundTint="#000000"
         app:layout_constraintEnd_toStartOf="@+id/btnSignUp"
@@ -72,20 +72,29 @@
                     android:scaleType="centerCrop"
                     android:src="@drawable/kalypsws_nails_logo" />
             </FrameLayout>
+            <View
+                android:id="@+id/dividerLine"
+                android:layout_width="match_parent"
+                android:layout_height="0.7dp"
+                android:background="#E8C6C6"
+                app:layout_constraintBottom_toTopOf="@+id/tvMyWork"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/tvMyWork"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
-                android:layout_marginBottom="24dp"
-                android:text="My Work"
+                android:layout_marginBottom="8dp"
+                android:text="My Work."
                 android:textSize="36sp"
-                android:fontFamily="cursive"
-                android:textColor="#EFE6E9"
-                android:shadowColor="#B00080"
-                android:shadowDx="6"
-                android:shadowDy="6"
+                android:letterSpacing="0.08"
+                android:fontFamily="@font/font4"
+                android:textColor="#E8C6C6"
+                android:shadowColor="#FF66B2"
+                android:shadowDx="3"
+                android:shadowDy="3"
                 android:shadowRadius="2" />
 
             <!-- 1η φωτογραφία: Μεγάλη -->
@@ -215,8 +224,8 @@
             android:text="\@kalypsws_nails"
             android:textSize="18sp"
             android:textStyle="bold"
-            android:fontFamily="cursive"
-            android:textColor="#FF66B2">
+            android:fontFamily="@font/font4"
+            android:textColor="#E8C6C6">
         </TextView>
     </LinearLayout>
 
