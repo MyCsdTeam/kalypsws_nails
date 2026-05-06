@@ -9,27 +9,33 @@
     android:background="#000000"
     tools:context=".MainActivity">
 
-    <!-- Κουμπιά πάνω δεξιά (Ροζ) -->
+    <!-- Κουμπιά πάνω δεξιά (Ροζ περίγραμμα, μαύρο φόντο, ροζ γράμματα) -->
     <Button
         android:id="@+id/btnSignUp"
+        style="?attr/materialButtonOutlinedStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:text="Sign Up"
-        android:textColor="#FFFFFF"
-        app:backgroundTint="#FF66B2"
+        android:textColor="#FF66B2"
+        app:strokeColor="#FF66B2"
+        app:strokeWidth="1.5dp"
+        app:backgroundTint="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
         android:id="@+id/btnLogin"
+        style="?attr/materialButtonOutlinedStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:text="Login"
-        android:textColor="#FFFFFF"
-        app:backgroundTint="#FF66B2"
+        android:textColor="#FF66B2"
+        app:strokeColor="#FF66B2"
+        app:strokeWidth="1.5dp"
+        app:backgroundTint="#000000"
         app:layout_constraintEnd_toStartOf="@+id/btnSignUp"
         app:layout_constraintTop_toTopOf="@+id/btnSignUp"
         app:layout_constraintBottom_toBottomOf="@+id/btnSignUp"/>
@@ -43,17 +49,20 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
 
+        <!-- Αφαιρέθηκε το padding=16dp από εδώ για να απλώνουν οι εικόνες στα άκρα.
+             Προστέθηκε μόνο πάνω/κάτω padding. -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center_horizontal"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingTop="16dp"
+            android:paddingBottom="16dp">
 
-            <!-- Το Logo (Μεγαλύτερο) με το ροζ περίγραμμα -->
+            <!-- Το Logo (Μεγαλύτερο στα 240dp) -->
             <FrameLayout
-                android:layout_width="180dp"
-                android:layout_height="180dp"
+                android:layout_width="350dp"
+                android:layout_height="240dp"
                 android:layout_marginTop="20dp">
 
                 <ImageView
@@ -64,19 +73,21 @@
                     android:src="@drawable/kalypsws_nails_logo" />
             </FrameLayout>
 
-            <!-- Κείμενο με καλλιγραφική γραμματοσειρά (cursive) -->
             <TextView
                 android:id="@+id/tvMyWork"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
                 android:layout_marginBottom="24dp"
-                android:text="Η δουλειά μου"
-                android:textSize="32sp"
+                android:text="My Work"
+                android:textSize="36sp"
                 android:fontFamily="cursive"
-                android:textColor="#FFFFFF" />
+                android:textColor="#EFE6E9"
+                android:shadowColor="#B00080"
+                android:shadowDx="6"
+                android:shadowDy="6"
+                android:shadowRadius="2" />
 
-            <!-- Αρχή ανομοιόμορφης διάταξης φωτογραφιών -->
             <!-- 1η φωτογραφία: Μεγάλη -->
             <ImageView
                 android:id="@+id/ivNail10"
@@ -112,68 +123,68 @@
                     android:src="@drawable/nail_3" />
             </LinearLayout>
 
-            <!-- 4η φωτογραφία: Μακρόστενη στη μέση -->
+            <!-- 4η έως 1η φωτογραφία: match_parent για να μην έχουν κενά αριστερά/δεξιά -->
             <ImageView
                 android:id="@+id/ivNail4"
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:scaleType="centerCrop"
                 android:layout_marginBottom="8dp"
                 android:src="@drawable/nail_4" />
 
-            <!-- Υπόλοιπες φωτογραφίες όπως τις όρισες -->
-            <ImageView
-                android:id="@+id/ivNail5"
-                android:layout_width="match_parent"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:layout_marginBottom="8dp"
-                android:src="@drawable/nail_5" />
-
             <ImageView
                 android:id="@+id/ivNail6"
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:scaleType="centerCrop"
                 android:layout_marginBottom="8dp"
                 android:src="@drawable/nail_6" />
 
-            <ImageView
-                android:id="@+id/ivNail7"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:layout_marginBottom="8dp"
-                android:src="@drawable/nail_7" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="150dp"
+                android:orientation="horizontal"
+                android:layout_marginBottom="8dp">
 
-            <ImageView
-                android:id="@+id/ivNail8"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
-                android:scaleType="centerCrop"
-                android:layout_marginBottom="8dp"
-                android:src="@drawable/nail_8" />
+                <ImageView
+                    android:id="@+id/ivNail5"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:layout_marginEnd="4dp"
+                    android:src="@drawable/nail_5" />
+
+                <ImageView
+                    android:id="@+id/ivNail7"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:scaleType="centerCrop"
+                    android:layout_marginStart="4dp"
+                    android:src="@drawable/nail_7" />
+            </LinearLayout>
 
             <ImageView
                 android:id="@+id/ivNail9"
-                android:layout_width="200dp"
+                android:layout_width="match_parent"
                 android:layout_height="200dp"
                 android:scaleType="centerCrop"
                 android:layout_marginBottom="8dp"
                 android:src="@drawable/nail_9" />
 
             <ImageView
-                android:id="@+id/ivNail1"
-                android:layout_width="200dp"
-                android:layout_height="200dp"
+                android:id="@+id/ivNail8"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
                 android:scaleType="centerCrop"
                 android:layout_marginBottom="8dp"
-                android:src="@drawable/nail_1" />
+                android:src="@drawable/nail_8" />
 
         </LinearLayout>
     </ScrollView>
 
-    <!-- Footer: Instagram Logo & Link (Μαύρο φόντο, ροζ γράμματα) -->
+    <!-- Footer: Έγινε clickable με κλήση της μεθόδου openInstagramProfile -->
     <LinearLayout
         android:id="@+id/footerLayout"
         android:layout_width="match_parent"
@@ -182,6 +193,10 @@
         android:orientation="horizontal"
         android:padding="12dp"
         android:background="#000000"
+        android:clickable="true"
+        android:focusable="true"
+        android:onClick="openInstagramProfile"
+        android:foreground="?android:attr/selectableItemBackground"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent">
@@ -198,9 +213,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:text="\@kalypsws_nails"
-            android:textColor="#FF66B2"
             android:textSize="18sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:fontFamily="cursive"
+            android:textColor="#FF66B2">
+        </TextView>
     </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

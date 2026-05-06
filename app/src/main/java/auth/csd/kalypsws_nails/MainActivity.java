@@ -2,8 +2,9 @@ package auth.csd.kalypsws_nails;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.net.Uri;
 import android.view.View;
-import android.widget.Button; // Μην ξεχάσεις αυτό το import
+import android.widget.Button;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.Insets;
@@ -52,5 +53,22 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(signupIntent);
             }
         });
+    }
+
+    public void openInstagramProfile(View view) {
+        String username = "kalypsws_nails";
+        Uri uri = Uri.parse("http://instagram.com/_u/" + username);
+        Intent likeIng = new Intent(Intent.ACTION_VIEW, uri);
+
+        // Προαιρετικά: Θέτει το πακέτο του Instagram για να ανοίξει κατευθείαν το app αν είναι εγκατεστημένο
+        likeIng.setPackage("com.instagram.android");
+
+        try {
+            startActivity(likeIng);
+        } catch (android.content.ActivityNotFoundException e) {
+            // Αν δεν υπάρχει η εφαρμογή του Instagram, το ανοίγει στον browser
+            startActivity(new Intent(Intent.ACTION_VIEW,
+                    Uri.parse("http://instagram.com/" + username)));
+        }
     }
 }
