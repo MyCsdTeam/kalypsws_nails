@@ -1,77 +1,134 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="#000000"
+    tools:context=".SignupActivity">
 
-    <!-- Κουμπί Back Πάνω Δεξιά -->
     <Button
         android:id="@+id/btnBackSignup"
+        style="?attr/materialButtonOutlinedStyle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentTop="true"
-        android:text="Back" />
+        android:layout_marginTop="50dp"
+        android:layout_marginEnd="16dp"
+        android:text="Back"
+        android:textColor="#E8C6C6"
+        android:fontFamily="@font/font4"
+        app:strokeColor="#E8C6C6"
+        app:strokeWidth="1.5dp"
+        app:backgroundTint="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- Χρήση ScrollView σε περίπτωση που η οθόνη είναι μικρή και δεν χωράνε τα πεδία -->
-    <ScrollView
+    <ImageView
+        android:id="@+id/logoImage"
+        android:layout_width="280dp"
+        android:layout_height="180dp"
+        android:layout_marginTop="40dp"
+        android:scaleType="centerInside"
+        android:src="@drawable/kalypsws_nails_logo"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btnBackSignup" />
+
+    <EditText
+        android:id="@+id/etUsernameSignup"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_below="@id/btnBackSignup"
-        android:layout_marginTop="16dp">
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="32dp"
+        android:padding="16dp"
+        android:hint="Username"
+        android:fontFamily="@font/font4"
+        android:textColorHint="#A0E8C6C6"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#E8C6C6"
+        android:textSize="18sp"
+        android:inputType="textPersonName"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/logoImage" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center">
+    <EditText
+        android:id="@+id/etEmailSignup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="16dp"
+        android:padding="16dp"
+        android:hint="Email"
+        android:fontFamily="@font/font4"
+        android:textColorHint="#A0E8C6C6"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#E8C6C6"
+        android:textSize="18sp"
+        android:inputType="textEmailAddress"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etUsernameSignup" />
 
-            <!-- Λογότυπο -->
-            <ImageView
-                android:id="@+id/ivLogoSignup"
-                android:layout_width="120dp"
-                android:layout_height="120dp"
-                android:src="@drawable/kalypsws_nails_logo"
-                android:layout_marginBottom="24dp" />
+    <EditText
+        android:id="@+id/etPasswordSignup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="16dp"
+        android:padding="16dp"
+        android:hint="Password"
+        android:fontFamily="@font/font4"
+        android:textColorHint="#A0E8C6C6"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#E8C6C6"
+        android:textSize="18sp"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etEmailSignup" />
 
-            <EditText
-                android:id="@+id/etUsernameSignup"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:hint="Username"
-                android:inputType="text"
-                android:layout_marginBottom="12dp" />
+    <EditText
+        android:id="@+id/etConfirmPassword"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="16dp"
+        android:padding="16dp"
+        android:hint="Confirm Password"
+        android:fontFamily="@font/font4"
+        android:textColorHint="#A0E8C6C6"
+        android:textColor="#FFFFFF"
+        android:backgroundTint="#E8C6C6"
+        android:textSize="18sp"
+        android:inputType="textPassword"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etPasswordSignup" />
 
-            <EditText
-                android:id="@+id/etEmailSignup"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:hint="Email"
-                android:inputType="textEmailAddress"
-                android:layout_marginBottom="12dp" />
+    <Button
+        android:id="@+id/btnSignupSubmit"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="40dp"
+        android:text="Sign Up"
+        android:textSize="18sp"
+        android:fontFamily="@font/font4"
+        android:textColor="#E8C6C6"
+        app:strokeColor="#E8C6C6"
+        app:strokeWidth="1.5dp"
+        app:backgroundTint="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/etConfirmPassword" />
 
-            <EditText
-                android:id="@+id/etPasswordSignup"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:hint="Password"
-                android:inputType="textPassword"
-                android:layout_marginBottom="12dp" />
-
-            <EditText
-                android:id="@+id/etConfirmPassword"
-                android:layout_width="match_parent"
-                android:layout_height="50dp"
-                android:hint="Επιβεβαίωση Password"
-                android:inputType="textPassword"
-                android:layout_marginBottom="24dp" />
-
-            <Button
-                android:id="@+id/btnSignupSubmit"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Sign Up" />
-
-        </LinearLayout>
-    </ScrollView>
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

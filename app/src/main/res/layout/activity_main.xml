@@ -75,11 +75,9 @@
             <View
                 android:id="@+id/dividerLine"
                 android:layout_width="match_parent"
-                android:layout_height="0.7dp"
-                android:background="#E8C6C6"
-                app:layout_constraintBottom_toTopOf="@+id/tvMyWork"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                android:layout_height="1dp"
+                android:layout_marginTop="16dp"
+                android:background="#E8C6C6" />
 
             <TextView
                 android:id="@+id/tvMyWork"
