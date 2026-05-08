@@ -1,41 +1,70 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center_horizontal"
-    android:padding="20dp"
-    android:background="@color/white"> <TextView
-    android:id="@+id/tvGreeting"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="Γεια σου ΧΡΗΣΤΗ"
-    android:textSize="26sp"
-    android:textStyle="bold"
-    android:textColor="#000000" android:fontFamily="sans-serif" android:layout_marginTop="20dp"
-    android:layout_marginBottom="20dp" />
+    android:background="#000000">
+
+    <TextView
+        android:id="@+id/tvGreeting"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginTop="50dp"
+        android:padding="16dp"
+        android:text="Hello User"
+        android:textSize="36sp"
+        android:letterSpacing="0.08"
+        android:fontFamily="@font/font4"
+        android:textColor="#E8C6C6"
+        android:shadowColor="#FF66B2"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="2"
+        android:gravity="center"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
         android:id="@+id/ivPriceList"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
+        android:layout_marginTop="24dp"
+        android:layout_marginBottom="24dp"
         android:scaleType="fitCenter"
         android:src="@drawable/price_list"
         android:contentDescription="Τιμοκατάλογος Υπηρεσιών"
-        android:layout_marginBottom="20dp" />
+        app:layout_constraintBottom_toTopOf="@+id/tvBookAppointment"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tvGreeting" />
 
     <TextView
         android:id="@+id/tvBookAppointment"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Κλείσε ραντεβού τώρα!"
-        android:textSize="22sp"
-        android:textStyle="bold|italic"
-        android:textColor="#FF4081" android:fontFamily="sans-serif" android:padding="15dp"
-        android:layout_marginBottom="30dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginEnd="32dp"
+        android:layout_marginBottom="50dp"
+        android:padding="16dp"
+        android:text="Book your appointment!"
+        android:fontFamily="@font/font4"
+        android:textSize="20sp"
+        android:textColor="#E8C6C6"
+        android:shadowColor="#FF66B2"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="2"
+        android:gravity="center"
         android:background="?attr/selectableItemBackground"
         android:clickable="true"
-        android:focusable="true" />
+        android:focusable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
