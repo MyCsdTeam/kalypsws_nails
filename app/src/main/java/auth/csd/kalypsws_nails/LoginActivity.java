@@ -1,5 +1,6 @@
 package auth.csd.kalypsws_nails;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -34,7 +35,8 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
-        // 3. Λειτουργία κουμπιού Login
+        /* 3. Λειτουργία κουμπιού Login
+        //Προσωρινά σε σχόλια ώστε να ελέξω το ΗomeActivity
         btnLoginSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -43,6 +45,16 @@ public class LoginActivity extends AppCompatActivity {
 
                 // Προσωρινό μήνυμα για να δούμε ότι δουλεύει (αργότερα θα μπει η SQLite)
                 Toast.makeText(LoginActivity.this, "Προσπάθεια σύνδεσης: " + username, Toast.LENGTH_SHORT).show();
+            }
+        });*/
+
+        //Προσωρινή Λειτουργια
+        btnLoginSubmit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Απευθείας μετάβαση στο HomeActivity χωρίς κανέναν έλεγχο
+                Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
+                startActivity(intent);
             }
         });
     }
