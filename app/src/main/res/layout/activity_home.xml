@@ -43,8 +43,9 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/tvGreeting" />
 
-    <TextView
+    <Button
         android:id="@+id/tvBookAppointment"
+        style="?attr/materialButtonOutlinedStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -55,14 +56,10 @@
         android:fontFamily="@font/font4"
         android:textSize="20sp"
         android:textColor="#E8C6C6"
-        android:shadowColor="#FF66B2"
-        android:shadowDx="3"
-        android:shadowDy="3"
-        android:shadowRadius="2"
-        android:gravity="center"
-        android:background="?attr/selectableItemBackground"
-        android:clickable="true"
-        android:focusable="true"
+        android:letterSpacing="0.05"
+        app:strokeColor="#E8C6C6"
+        app:strokeWidth="1.5dp"
+        app:backgroundTint="#000000"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />
