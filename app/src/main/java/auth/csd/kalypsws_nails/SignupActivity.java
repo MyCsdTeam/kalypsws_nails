@@ -1,5 +1,6 @@
 package auth.csd.kalypsws_nails;
 
+import android.content.Intent; // Προστέθηκε για τη μετάβαση
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -99,8 +100,15 @@ public class SignupActivity extends AppCompatActivity {
                                     db.collection("users").document(userId)
                                             .set(user)
                                             .addOnSuccessListener(aVoid -> {
-                                                Toast.makeText(SignupActivity.this, "Η εγγραφή ολοκληρώθηκε με επιτυχία!", Toast.LENGTH_LONG).show();
-                                                finish(); // Επιστροφή στην αρχική οθόνη
+                                                Toast.makeText(SignupActivity.this, "Η εγγραφή ολοκληρώθηκε! Παρακαλώ συνδεθείτε.", Toast.LENGTH_LONG).show();
+
+                                                // ΑΛΛΑΓΗ: Αυτόματη μετάβαση στο LoginActivity
+                                                Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
+                                                // Καθαρίζουμε το stack των οθονών
+                                                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                                startActivity(intent);
+
+                                                finish(); // Κλείνει το SignupActivity
                                             })
                                             .addOnFailureListener(e -> {
                                                 Toast.makeText(SignupActivity.this, "Σφάλμα αποθήκευσης στη βάση: " + e.getMessage(), Toast.LENGTH_SHORT).show();
