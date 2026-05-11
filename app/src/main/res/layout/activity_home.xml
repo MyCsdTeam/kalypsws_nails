@@ -7,6 +7,23 @@
     android:layout_height="match_parent"
     android:background="#000000">
 
+    <Button
+        android:id="@+id/btnLogout"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="65dp"
+        android:layout_marginTop="60dp"
+        android:layout_marginEnd="32dp"
+        android:text="Logout"
+        android:textColor="#E8C6C6"
+        android:textSize="12sp"
+        android:fontFamily="@font/font4"
+        app:strokeColor="#E8C6C6"
+        app:strokeWidth="1dp"
+        app:backgroundTint="#000000"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <TextView
         android:id="@+id/tvGreeting"
         android:layout_width="match_parent"
@@ -27,21 +44,19 @@
         android:gravity="center"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <ImageView
-        android:id="@+id/ivPriceList"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginBottom="24dp"
-        android:scaleType="fitCenter"
-        android:src="@drawable/price_list"
-        android:contentDescription="Τιμοκατάλογος Υπηρεσιών"
-        app:layout_constraintBottom_toTopOf="@+id/tvBookAppointment"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tvGreeting" />
+        app:layout_constraintTop_toBottomOf="@+id/btnLogout" /> <ImageView
+    android:id="@+id/ivPriceList"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_marginTop="24dp"
+    android:layout_marginBottom="24dp"
+    android:scaleType="fitCenter"
+    android:src="@drawable/price_list"
+    android:contentDescription="Τιμοκατάλογος Υπηρεσιών"
+    app:layout_constraintBottom_toTopOf="@+id/tvBookAppointment"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@+id/tvGreeting" />
 
     <Button
         android:id="@+id/tvBookAppointment"
