@@ -37,20 +37,20 @@
         app:layout_constraintTop_toBottomOf="@+id/btnBackLogin" />
 
     <EditText
-        android:id="@+id/etUsernameLogin"
+        android:id="@+id/etEmailLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginTop="50dp"
         android:padding="16dp"
-        android:hint="Username"
+        android:hint="Email"
         android:fontFamily="@font/font4"
         android:textColorHint="#A0E8C6C6"
         android:textColor="#FFFFFF"
         android:backgroundTint="#E8C6C6"
         android:textSize="20sp"
-        android:inputType="textPersonName"
+        android:inputType="textEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logoImage" />
@@ -72,7 +72,7 @@
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etUsernameLogin" />
+        app:layout_constraintTop_toBottomOf="@+id/etEmailLogin" />
 
     <Button
         android:id="@+id/btnLoginSubmit"
