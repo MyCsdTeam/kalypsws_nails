@@ -22,7 +22,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 
@@ -102,6 +101,7 @@ public class HomeActivity extends AppCompatActivity {
         TextView tvSelectTimeLabel = dialog.findViewById(R.id.tvSelectTimeLabel);
         Spinner spinnerHours = dialog.findViewById(R.id.spinnerHours);
         Button btnConfirmAppointment = dialog.findViewById(R.id.btnConfirmAppointment);
+        Button btnEmergency = dialog.findViewById(R.id.btnEmergency);
 
         calendarView.setMinDate(System.currentTimeMillis() - 1000);
 
@@ -113,7 +113,8 @@ public class HomeActivity extends AppCompatActivity {
                 "Gel Επιμήκυνση (2 ώρες)",
                 "Ακρυλικό Επιμήκυνση (2 ώρες)",
                 "Συντήρηση (1.5 ώρα)",
-                "Ημιμόνιμο (1 ώρα)"
+                "Ημιμόνιμο (1 ώρα)",
+                "Σπασμένο Νύχι SOS (20 λεπτά)"
         };
 
         ArrayAdapter<String> serviceAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, services) {
@@ -140,6 +141,11 @@ public class HomeActivity extends AppCompatActivity {
         };
         serviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerService.setAdapter(serviceAdapter);
+
+        // Συντόμευση: Επιλέγει το SOS
+        btnEmergency.setOnClickListener(v -> {
+            spinnerService.setSelection(5);
+        });
 
         spinnerService.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -180,6 +186,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (spinnerService.getSelectedItemPosition() == 1 || spinnerService.getSelectedItemPosition() == 2) durationMinutes = 120;
                 else if (spinnerService.getSelectedItemPosition() == 3) durationMinutes = 90;
                 else if (spinnerService.getSelectedItemPosition() == 4) durationMinutes = 60;
+                else if (spinnerService.getSelectedItemPosition() == 5) durationMinutes = 20;
 
                 btnConfirmAppointment.setEnabled(false);
                 btnConfirmAppointment.setText("Αποθήκευση...");
@@ -189,7 +196,7 @@ public class HomeActivity extends AppCompatActivity {
                 appointment.put("service", service);
                 appointment.put("date", currentSelectedDate[0]);
                 appointment.put("time", cleanTime);
-                appointment.put("duration", durationMinutes); // Αποθηκεύουμε πλέον ΚΑΙ τη διάρκεια
+                appointment.put("duration", durationMinutes);
 
                 db.collection("appointments").add(appointment)
                         .addOnSuccessListener(documentReference -> {
@@ -203,7 +210,7 @@ public class HomeActivity extends AppCompatActivity {
                         });
 
             } else {
-                Toast.makeText(HomeActivity.this, "Συμπλήρωσε όλα τα πεδία (Υπηρεσία και Ώρα)!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(HomeActivity.this, "Συμπλήρωσε όλα τα πεδία!", Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -227,20 +234,20 @@ public class HomeActivity extends AppCompatActivity {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // Λίστα που θα κρατάει [Έναρξη σε λεπτά, Λήξη σε λεπτά] για κάθε κλεισμένο ραντεβού
+                        // [startMins, exactEndMins, isSOS (1=ΝΑΙ, 0=ΟΧΙ)]
                         List<int[]> bookedIntervals = new ArrayList<>();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
                             String time = document.getString("time");
                             Long durationLong = document.getLong("duration");
                             int duration = (durationLong != null) ? durationLong.intValue() : 0;
+                            String svc = document.getString("service");
 
-                            // Fallback σε περίπτωση που υπάρχουν παλιά test ραντεβού χωρίς πεδίο duration
                             if (duration == 0) {
-                                String svc = document.getString("service");
                                 if (svc != null && svc.contains("2 ώρες")) duration = 120;
                                 else if (svc != null && svc.contains("1.5 ώρα")) duration = 90;
                                 else if (svc != null && svc.contains("1 ώρα")) duration = 60;
+                                else if (svc != null && svc.contains("SOS")) duration = 20;
                             }
 
                             if (time != null) {
@@ -249,9 +256,10 @@ public class HomeActivity extends AppCompatActivity {
                                 int m = Integer.parseInt(parts[1]);
                                 int startMins = h * 60 + m;
 
-                                // ΠΡΟΣΘΗΚΗ ΤΟΥ 20ΛΕΠΤΟΥ ΚΕΝΟΥ
-                                int endMins = startMins + duration + 20;
-                                bookedIntervals.add(new int[]{startMins, endMins});
+                                int exactEndMins = startMins + duration;
+                                int isSOS = (svc != null && svc.contains("SOS")) ? 1 : 0;
+
+                                bookedIntervals.add(new int[]{startMins, exactEndMins, isSOS});
                             }
                         }
                         populateHoursSpinner(bookedIntervals, servicePos, spinnerHours, tvSelectTimeLabel);
@@ -263,40 +271,51 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void populateHoursSpinner(List<int[]> bookedIntervals, int servicePos, Spinner spinnerHours, TextView tvSelectTimeLabel) {
-        int baseDuration = 0;
-        if (servicePos == 1 || servicePos == 2) baseDuration = 120;
-        else if (servicePos == 3) baseDuration = 90;
-        else if (servicePos == 4) baseDuration = 60;
-
-        // Ο συνολικός χρόνος που απαιτείται για το ΝΕΟ ραντεβού (Υπηρεσία + 20 λεπτά)
-        int reqTotalMins = baseDuration + 20;
-
         tvSelectTimeLabel.setText("3. Διαθέσιμες Ώρες:");
         spinnerHours.setVisibility(View.VISIBLE);
 
         List<String> hoursList = new ArrayList<>();
         hoursList.add("Επίλεξε Ώρα...");
 
+        int baseDuration = 0;
+        if (servicePos == 1 || servicePos == 2) baseDuration = 120;
+        else if (servicePos == 3) baseDuration = 90;
+        else if (servicePos == 4) baseDuration = 60;
+        else if (servicePos == 5) baseDuration = 20;
+
+        boolean isEmergencyRequest = (servicePos == 5);
+
+        // Το SOS χρειάζεται μόνο τα 20 λεπτά του. Τα κανονικά θέλουν τον χρόνο τους + 20λ κενό μετά.
+        int reqTotalMins = baseDuration + (isEmergencyRequest ? 0 : 20);
+
         int openTimeMins = 10 * 60; // 10:00
         int closeTimeMins = 18 * 60; // 18:00
-        int stepMins = 30; // Δημιουργία επιλογών ανά 30 λεπτά για ευελιξία
+        int stepMins = 30; // Δημιουργεί επιλογές ανά 30 λεπτά (10:00, 10:30, 11:00 κλπ)
+        // τα οποία "κουμπώνουν" τέλεια στα διαλείμματα των ραντεβού!
 
-        // Ελέγχουμε κάθε 30λεπτο αν χωράει το ραντεβού
         for (int startMins = openTimeMins; (startMins + reqTotalMins) <= closeTimeMins; startMins += stepMins) {
             int endMins = startMins + reqTotalMins;
-
             boolean isOverlapping = false;
 
-            // Μαθηματικός έλεγχος: Το νέο ραντεβού "χτυπάει" πάνω σε κάποιο ήδη κλεισμένο;
             for (int[] booked : bookedIntervals) {
                 int bStart = booked[0];
-                int bEnd = booked[1];
+                int bExactEnd = booked[1];
+                int bIsSOS = booked[2];
 
-                // Αν η αρχή του νέου ραντεβού είναι πριν το τέλος του παλιού
-                // ΚΑΙ η αρχή του παλιού είναι πριν το τέλος του νέου -> Υπάρχει επικάλυψη!
-                if (startMins < bEnd && bStart < endMins) {
-                    isOverlapping = true;
-                    break;
+                if (isEmergencyRequest) {
+                    // Αν κλείνουμε SOS, ελέγχουμε ΜΟΝΟ τον καθαρό χρόνο δουλειάς (bExactEnd) των άλλων ραντεβού.
+                    // Έτσι του επιτρέπουμε να "καβαλήσει" τα 20λεπτα διαλείμματα τους!
+                    if (startMins < bExactEnd && bStart < endMins) {
+                        isOverlapping = true;
+                        break;
+                    }
+                } else {
+                    // Αν κλείνουμε ΚΑΝΟΝΙΚΟ ραντεβού, σεβόμαστε και τα διαλείμματα των προηγούμενων.
+                    int bPaddedEnd = bExactEnd + (bIsSOS == 0 ? 20 : 0);
+                    if (startMins < bPaddedEnd && bStart < endMins) {
+                        isOverlapping = true;
+                        break;
+                    }
                 }
             }
 
@@ -307,10 +326,15 @@ public class HomeActivity extends AppCompatActivity {
             if (isOverlapping) {
                 hoursList.add(timeFormatted + " (Δεσμευμένο)");
             } else {
-                hoursList.add(timeFormatted + " (Διαθέσιμο)");
+                if (isEmergencyRequest) {
+                    hoursList.add(timeFormatted + " (Διαθέσιμο SOS)");
+                } else {
+                    hoursList.add(timeFormatted + " (Διαθέσιμο)");
+                }
             }
         }
 
+        // Έλεγχος αν όλα είναι δεσμευμένα
         boolean allBooked = true;
         for (int i = 1; i < hoursList.size(); i++) {
             if (!hoursList.get(i).contains("Δεσμευμένο")) {
@@ -320,7 +344,7 @@ public class HomeActivity extends AppCompatActivity {
         }
 
         if (allBooked && hoursList.size() > 1) {
-            tvSelectTimeLabel.setText("❌ Δεν υπάρχει αρκετός χρόνος σήμερα!");
+            tvSelectTimeLabel.setText("❌ Δεν υπάρχει διαθέσιμος χρόνος σήμερα!");
             tvSelectTimeLabel.setTextColor(Color.parseColor("#FF4C4C"));
             spinnerHours.setVisibility(View.GONE);
             return;
@@ -343,6 +367,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 if (position == 0) tv.setTextColor(Color.GRAY);
                 else if (getItem(position).contains("Δεσμευμένο")) tv.setTextColor(Color.parseColor("#FF4C4C"));
+                else if (getItem(position).contains("SOS")) tv.setTextColor(Color.parseColor("#FFB266")); // Πορτοκαλί για SOS
                 else tv.setTextColor(Color.parseColor("#4CFF4C"));
 
                 return view;
@@ -357,6 +382,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 if (position == 0) tv.setTextColor(Color.parseColor("#E8C6C6"));
                 else if (getItem(position).contains("Δεσμευμένο")) tv.setTextColor(Color.parseColor("#FF4C4C"));
+                else if (getItem(position).contains("SOS")) tv.setTextColor(Color.parseColor("#FFB266"));
                 else tv.setTextColor(Color.parseColor("#4CFF4C"));
 
                 return view;

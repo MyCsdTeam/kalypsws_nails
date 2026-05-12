@@ -5,29 +5,54 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:background="#151515"
-    android:padding="24dp"> <TextView
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="Ραντεβού"
-    android:textColor="#FF66B2"
-    android:textSize="28sp"
-    android:fontFamily="@font/font4"
-    android:textStyle="italic"
-    android:gravity="center"
-    android:shadowColor="#000000"
-    android:shadowDx="2"
-    android:shadowDy="2"
-    android:shadowRadius="2"
-    android:layout_marginBottom="24dp"/>
+    android:padding="24dp">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="1. Υπηρεσία:"
-        android:textColor="#E8C6C6"
-        android:textSize="18sp"
-        android:textStyle="bold|italic"
-        android:layout_marginBottom="8dp"/>
+        android:text="Ραντεβού"
+        android:textColor="#FF66B2"
+        android:textSize="28sp"
+        android:fontFamily="@font/font4"
+        android:textStyle="italic"
+        android:gravity="center"
+        android:shadowColor="#000000"
+        android:shadowDx="2"
+        android:shadowDy="2"
+        android:shadowRadius="2"
+        android:layout_marginBottom="24dp"/>
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="1. Υπηρεσία:"
+            android:textColor="#E8C6C6"
+            android:textSize="18sp"
+            android:textStyle="bold|italic"
+            android:layout_alignParentStart="true"
+            android:layout_centerVertical="true" />
+
+        <Button
+            android:id="@+id/btnEmergency"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="SOS 20'"
+            android:textColor="#FF4C4C"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:fontFamily="@font/font4"
+            android:backgroundTint="#151515"
+            app:strokeColor="#FF4C4C"
+            app:strokeWidth="1dp"
+            android:layout_alignParentEnd="true"
+            android:layout_centerVertical="true"
+            app:cornerRadius="8dp" />
+    </RelativeLayout>
 
     <Spinner
         android:id="@+id/spinnerService"
