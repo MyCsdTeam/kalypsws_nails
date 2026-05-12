@@ -33,6 +33,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+// Imports για το JavaMail API
+import javax.mail.Authenticator;
+import javax.mail.Message;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 
 public class HomeActivity extends AppCompatActivity {
 
@@ -202,6 +214,18 @@ public class HomeActivity extends AppCompatActivity {
                         .addOnSuccessListener(documentReference -> {
                             Toast.makeText(HomeActivity.this, "Το ραντεβού έκλεισε επιτυχώς!", Toast.LENGTH_LONG).show();
                             dialog.dismiss();
+
+                            // --- ΝΕΟΣ ΚΩΔΙΚΑΣ: Αποστολή Email ---
+                            FirebaseUser currentUser = mAuth.getCurrentUser();
+                            if (currentUser != null && currentUser.getEmail() != null) {
+                                String userEmail = currentUser.getEmail();
+                                // Ανάγνωση των κρυφών strings από το secrets.xml
+                                String senderEmail = getString(R.string.sender_email);
+                                String senderPass = getString(R.string.email_app_password);
+
+                                sendEmailDirectly(userEmail, senderEmail, senderPass, service, currentSelectedDate[0], cleanTime);
+                            }
+                            // ------------------------------------
                         })
                         .addOnFailureListener(e -> {
                             btnConfirmAppointment.setEnabled(true);
@@ -234,7 +258,6 @@ public class HomeActivity extends AppCompatActivity {
                 .get()
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
-                        // [startMins, exactEndMins, isSOS (1=ΝΑΙ, 0=ΟΧΙ)]
                         List<int[]> bookedIntervals = new ArrayList<>();
 
                         for (QueryDocumentSnapshot document : task.getResult()) {
@@ -285,13 +308,11 @@ public class HomeActivity extends AppCompatActivity {
 
         boolean isEmergencyRequest = (servicePos == 5);
 
-        // Το SOS χρειάζεται μόνο τα 20 λεπτά του. Τα κανονικά θέλουν τον χρόνο τους + 20λ κενό μετά.
         int reqTotalMins = baseDuration + (isEmergencyRequest ? 0 : 20);
 
-        int openTimeMins = 10 * 60; // 10:00
-        int closeTimeMins = 18 * 60; // 18:00
-        int stepMins = 30; // Δημιουργεί επιλογές ανά 30 λεπτά (10:00, 10:30, 11:00 κλπ)
-        // τα οποία "κουμπώνουν" τέλεια στα διαλείμματα των ραντεβού!
+        int openTimeMins = 10 * 60;
+        int closeTimeMins = 18 * 60;
+        int stepMins = 30;
 
         for (int startMins = openTimeMins; (startMins + reqTotalMins) <= closeTimeMins; startMins += stepMins) {
             int endMins = startMins + reqTotalMins;
@@ -303,14 +324,11 @@ public class HomeActivity extends AppCompatActivity {
                 int bIsSOS = booked[2];
 
                 if (isEmergencyRequest) {
-                    // Αν κλείνουμε SOS, ελέγχουμε ΜΟΝΟ τον καθαρό χρόνο δουλειάς (bExactEnd) των άλλων ραντεβού.
-                    // Έτσι του επιτρέπουμε να "καβαλήσει" τα 20λεπτα διαλείμματα τους!
                     if (startMins < bExactEnd && bStart < endMins) {
                         isOverlapping = true;
                         break;
                     }
                 } else {
-                    // Αν κλείνουμε ΚΑΝΟΝΙΚΟ ραντεβού, σεβόμαστε και τα διαλείμματα των προηγούμενων.
                     int bPaddedEnd = bExactEnd + (bIsSOS == 0 ? 20 : 0);
                     if (startMins < bPaddedEnd && bStart < endMins) {
                         isOverlapping = true;
@@ -334,7 +352,6 @@ public class HomeActivity extends AppCompatActivity {
             }
         }
 
-        // Έλεγχος αν όλα είναι δεσμευμένα
         boolean allBooked = true;
         for (int i = 1; i < hoursList.size(); i++) {
             if (!hoursList.get(i).contains("Δεσμευμένο")) {
@@ -367,7 +384,7 @@ public class HomeActivity extends AppCompatActivity {
 
                 if (position == 0) tv.setTextColor(Color.GRAY);
                 else if (getItem(position).contains("Δεσμευμένο")) tv.setTextColor(Color.parseColor("#FF4C4C"));
-                else if (getItem(position).contains("SOS")) tv.setTextColor(Color.parseColor("#FFB266")); // Πορτοκαλί για SOS
+                else if (getItem(position).contains("SOS")) tv.setTextColor(Color.parseColor("#FFB266"));
                 else tv.setTextColor(Color.parseColor("#4CFF4C"));
 
                 return view;
@@ -391,5 +408,44 @@ public class HomeActivity extends AppCompatActivity {
 
         hoursAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerHours.setAdapter(hoursAdapter);
+    }
+
+    // --- ΝΕΑ ΜΕΘΟΔΟΣ ΓΙΑ ΑΠΟΣΤΟΛΗ EMAIL ---
+    private void sendEmailDirectly(String toEmail, String senderEmail, String senderPassword, String serviceName, String date, String time) {
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            try {
+                Properties props = new Properties();
+                props.put("mail.smtp.auth", "true");
+                props.put("mail.smtp.starttls.enable", "true");
+                props.put("mail.smtp.host", "smtp.gmail.com");
+                props.put("mail.smtp.port", "587");
+
+                Session session = Session.getInstance(props, new Authenticator() {
+                    @Override
+                    protected PasswordAuthentication getPasswordAuthentication() {
+                        return new PasswordAuthentication(senderEmail, senderPassword);
+                    }
+                });
+
+                Message message = new MimeMessage(session);
+                message.setFrom(new InternetAddress(senderEmail, "Kalypsw's Nails"));
+                message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(toEmail));
+                message.setSubject("Επιβεβαίωση Ραντεβού - Kalypsw's Nails 💅");
+
+                String emailText = "Γεια σου!\n\n" +
+                        "Το ραντεβού σου επιβεβαιώθηκε με επιτυχία.\n\n" +
+                        "Υπηρεσία: " + serviceName + "\n" +
+                        "Ημερομηνία: " + date + "\n" +
+                        "Ώρα: " + time + "\n\n" +
+                        "Σε περιμένουμε!\nKalypsw's Nails";
+
+                message.setText(emailText);
+                Transport.send(message);
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
     }
 }

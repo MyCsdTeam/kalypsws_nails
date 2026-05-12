@@ -10,3 +10,4 @@ local.properties
 *.apk
 *.aab
 google-services.json
+**/secrets.xml
