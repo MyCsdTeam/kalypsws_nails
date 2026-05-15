@@ -54,21 +54,42 @@ public class LoginActivity extends AppCompatActivity {
                     Toast.makeText(LoginActivity.this, "Συμπληρώστε email και password!", Toast.LENGTH_SHORT).show();
                     return;
                 }
+                String adminEmail = getString(R.string.admin_email);
+                String adminPass = getString(R.string.admin_pass);
+// Αν το email σας είναι π.χ. kalypswsnails@gmail.com
+                if (email.equals(adminEmail) && password.equals(adminPass)) {
+                    mAuth.signInWithEmailAndPassword(email, password)
+                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                @Override
+                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                    if (task.isSuccessful()) {
+                                        Toast.makeText(LoginActivity.this, "Καλωσήρθες Admin!", Toast.LENGTH_SHORT).show();
+                                        Intent intent = new Intent(LoginActivity.this, AdminActivity.class);
+                                        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
+                                        startActivity(intent);
+                                        finish();
+                                    } else {
+                                        Toast.makeText(LoginActivity.this, "Σφάλμα Admin: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                                    }
+                                }
+                            });
+                    return;
+                }
+                // ---------------------------------------
 
-                // Λογική Σύνδεσης Firebase
+                // Υπάρχουσα Λογική Σύνδεσης Firebase
                 mAuth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            // ... (ο υπάρχων κώδικάς σου παραμένει ίδιος) ...
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
-                                    // Επιτυχία: Μετάβαση στο Home
                                     Toast.makeText(LoginActivity.this, "Σύνδεση επιτυχής!", Toast.LENGTH_SHORT).show();
                                     Intent intent = new Intent(LoginActivity.this, HomeActivity.class);
                                     intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                     startActivity(intent);
                                     finish();
                                 } else {
-                                    // Αποτυχία
                                     Toast.makeText(LoginActivity.this, "Σφάλμα: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                 }
                             }

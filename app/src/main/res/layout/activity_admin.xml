@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#000000"
+    android:padding="24dp">
+
+    <Button
+        android:id="@+id/btnAdminLogout"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="end"
+        android:text="Logout"
+        android:textColor="#E8C6C6"
+        android:fontFamily="@font/font4"
+        app:strokeColor="#E8C6C6"
+        app:strokeWidth="1dp"
+        app:backgroundTint="#000000" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Πάνελ Διαχειριστή"
+        android:textColor="#FF66B2"
+        android:textSize="28sp"
+        android:fontFamily="@font/font4"
+        android:gravity="center"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="20dp"/>
+
+    <CalendarView
+        android:id="@+id/adminCalendarView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@android:style/ThemeOverlay.Material.Dark"
+        android:layout_marginBottom="16dp"/>
+
+    <TextView
+        android:id="@+id/tvDateStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Επίλεξε μια ημερομηνία..."
+        android:textColor="#E8C6C6"
+        android:textSize="18sp"
+        android:textStyle="bold|italic"
+        android:gravity="center"
+        android:layout_marginBottom="24dp"
+        android:padding="8dp" />
+
+    <Button
+        android:id="@+id/btnBlockTime"
+        style="?attr/materialButtonOutlinedStyle"
+        android:layout_width="match_parent"
+        android:layout_height="65dp"
+        android:text="Δέσμευση Ολόκληρης Μέρας"
+        android:textColor="#FF4C4C"
+        android:textSize="18sp"
+        android:fontFamily="@font/font4"
+        android:enabled="false"
+        app:strokeColor="#FF4C4C"
+        app:strokeWidth="1.5dp"
+        app:backgroundTint="#000000" />
+
+</LinearLayout>
