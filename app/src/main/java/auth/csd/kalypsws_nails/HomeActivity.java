@@ -1,6 +1,8 @@
 package auth.csd.kalypsws_nails;
 
+import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -12,6 +14,8 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.LinearLayout;
+import android.widget.ScrollView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -49,7 +53,7 @@ import javax.mail.internet.MimeMessage;
 public class HomeActivity extends AppCompatActivity {
 
     private TextView tvGreeting;
-    private Button btnLogout, btnBookAppointment;
+    private Button btnLogout, btnBookAppointment, btnMyAppointments;
 
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
@@ -63,6 +67,7 @@ public class HomeActivity extends AppCompatActivity {
         tvGreeting = findViewById(R.id.tvGreeting);
         btnLogout = findViewById(R.id.btnLogout);
         btnBookAppointment = findViewById(R.id.tvBookAppointment);
+        btnMyAppointments = findViewById(R.id.btnMyAppointments);
 
         if (btnBookAppointment instanceof Button) {
             btnBookAppointment.setPaintFlags(btnBookAppointment.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
@@ -96,9 +101,131 @@ public class HomeActivity extends AppCompatActivity {
             finish();
         });
 
+        // Κουμπιά για Ραντεβού
         btnBookAppointment.setOnClickListener(v -> showAppointmentDialog());
+        btnMyAppointments.setOnClickListener(v -> showCancelAppointmentDialog());
     }
 
+    // --- ΒΕΛΤΙΩΜΕΝΗ ΚΑΙ ΚΟΜΨΗ ΜΕΘΟΔΟΣ ΓΙΑ ΤΑ ΡΑΝΤΕΒΟΥ ΜΟΥ ---
+    private void showCancelAppointmentDialog() {
+        ProgressDialog loading = new ProgressDialog(this);
+        loading.setMessage("Αναζήτηση ραντεβού...");
+        loading.show();
+
+        db.collection("appointments")
+                .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    loading.dismiss();
+
+                    // Δημιουργία του παραθύρου
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog);
+                    builder.setTitle("Τα Προσεχή Ραντεβού μου");
+
+                    // Φτιάχνουμε δυναμικά ένα Layout με Scroll
+                    ScrollView scrollView = new ScrollView(this);
+                    LinearLayout layout = new LinearLayout(this);
+                    layout.setOrientation(LinearLayout.VERTICAL);
+                    layout.setPadding(50, 50, 50, 50);
+                    scrollView.addView(layout);
+
+                    boolean hasFutureAppointments = false;
+                    SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+                    long currentTime = System.currentTimeMillis();
+
+                    AlertDialog mainDialog = builder.create(); // Το δημιουργούμε εδώ για να μπορούμε να το κλείσουμε μετά
+
+                    for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
+                        String date = doc.getString("date");
+                        String time = doc.getString("time");
+                        String service = doc.getString("service");
+                        String selectedId = doc.getId();
+
+                        try {
+                            String appointmentDateTime = date + " " + time;
+                            Date appDate = fullSdf.parse(appointmentDateTime);
+
+                            // ΦΙΛΤΡΟ 1: Εμφάνιση ΜΟΝΟ αν το ραντεβού είναι στο μέλλον (μετά τη σημερινή μέρα και ώρα)
+                            if (appDate != null && appDate.getTime() > currentTime) {
+                                hasFutureAppointments = true;
+
+                                // --- ΔΗΜΙΟΥΡΓΙΑ ΚΟΜΨΟΥ ΚΟΥΜΠΙΟΥ ΓΙΑ ΤΟ ΡΑΝΤΕΒΟΥ ---
+                                Button btnApp = new Button(this);
+                                btnApp.setText(service + "\n" + date + "  |  " + time);
+                                btnApp.setAllCaps(false);
+                                btnApp.setTextSize(16);
+                                btnApp.setTextColor(Color.parseColor("#FF66B2")); // Ροζ γράμματα
+                                btnApp.setPadding(40, 50, 40, 50);
+
+                                // Γραφικός σχεδιασμός κουμπιού (Στρογγυλεμένες γωνίες, σκούρο φόντο, ροζ περίγραμμα)
+                                android.graphics.drawable.GradientDrawable gd = new android.graphics.drawable.GradientDrawable();
+                                gd.setColor(Color.parseColor("#151515")); // Σκούρο γκρι φόντο
+                                gd.setCornerRadius(25f);
+                                gd.setStroke(3, Color.parseColor("#E8C6C6")); // Nude pink περίγραμμα
+                                btnApp.setBackground(gd);
+
+                                LinearLayout.LayoutParams params = new LinearLayout.LayoutParams(
+                                        ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                                params.setMargins(0, 0, 0, 35); // Κενό ανάμεσα στα κουμπιά
+                                btnApp.setLayoutParams(params);
+
+                                // Τι γίνεται όταν πατάει το ραντεβού
+                                btnApp.setOnClickListener(v -> {
+                                    long diffInMs = appDate.getTime() - currentTime;
+                                    long diffInHours = diffInMs / (60 * 60 * 1000);
+
+                                    // ΦΙΛΤΡΟ 2: Ακύρωση μόνο αν απέχουμε πάνω από 24 ώρες
+                                    if (diffInHours >= 24) {
+                                        // --- ΜΗΝΥΜΑ ΕΠΙΒΕΒΑΙΩΣΗΣ ---
+                                        new AlertDialog.Builder(this, android.app.AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+                                                .setTitle("Επιβεβαίωση Ακύρωσης")
+                                                .setMessage("Είστε σίγουροι ότι θέλετε να ακυρώσετε το ραντεβού σας για:\n\n" + service + "\nστις " + date + " " + time + ";")
+                                                .setPositiveButton("Ναι, Ακύρωση", (confDialog, confWhich) -> {
+                                                    db.collection("appointments").document(selectedId).delete()
+                                                            .addOnSuccessListener(aVoid -> {
+                                                                Toast.makeText(HomeActivity.this, "Το ραντεβού ακυρώθηκε επιτυχώς.", Toast.LENGTH_LONG).show();
+                                                                mainDialog.dismiss(); // Κλείνει το αρχικό παράθυρο για να ανανεωθεί
+                                                            })
+                                                            .addOnFailureListener(e -> {
+                                                                Toast.makeText(HomeActivity.this, "Σφάλμα κατά τη διαγραφή.", Toast.LENGTH_SHORT).show();
+                                                            });
+                                                })
+                                                .setNegativeButton("Πίσω", null)
+                                                .show();
+                                    } else {
+                                        Toast.makeText(HomeActivity.this, "Αδυναμία ακύρωσης. Απομένουν λιγότερες από 24 ώρες!", Toast.LENGTH_LONG).show();
+                                    }
+                                });
+
+                                layout.addView(btnApp);
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+
+                    // Αν δεν υπάρχει κανένα μελλοντικό ραντεβού
+                    if (!hasFutureAppointments) {
+                        TextView tvNoApp = new TextView(this);
+                        tvNoApp.setText("Δεν έχετε κανένα προσεχές ραντεβού.");
+                        tvNoApp.setTextColor(Color.parseColor("#E8C6C6"));
+                        tvNoApp.setTextSize(18);
+                        tvNoApp.setGravity(android.view.Gravity.CENTER);
+                        tvNoApp.setPadding(0, 40, 0, 40);
+                        layout.addView(tvNoApp);
+                    }
+
+                    mainDialog.setView(scrollView);
+                    mainDialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Κλείσιμο", (d, w) -> mainDialog.dismiss());
+                    mainDialog.show();
+                })
+                .addOnFailureListener(e -> {
+                    loading.dismiss();
+                    Toast.makeText(this, "Σφάλμα σύνδεσης με τη βάση.", Toast.LENGTH_SHORT).show();
+                });
+    }
+
+    // --- ΜΕΘΟΔΟΣ ΓΙΑ ΝΕΟ ΡΑΝΤΕΒΟΥ ---
     private void showAppointmentDialog() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_appointment);
@@ -154,10 +281,7 @@ public class HomeActivity extends AppCompatActivity {
         serviceAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerService.setAdapter(serviceAdapter);
 
-        // Συντόμευση: Επιλέγει το SOS
-        btnEmergency.setOnClickListener(v -> {
-            spinnerService.setSelection(5);
-        });
+        btnEmergency.setOnClickListener(v -> spinnerService.setSelection(5));
 
         spinnerService.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
@@ -215,17 +339,14 @@ public class HomeActivity extends AppCompatActivity {
                             Toast.makeText(HomeActivity.this, "Το ραντεβού έκλεισε επιτυχώς!", Toast.LENGTH_LONG).show();
                             dialog.dismiss();
 
-                            // --- ΝΕΟΣ ΚΩΔΙΚΑΣ: Αποστολή Email ---
                             FirebaseUser currentUser = mAuth.getCurrentUser();
                             if (currentUser != null && currentUser.getEmail() != null) {
                                 String userEmail = currentUser.getEmail();
-                                // Ανάγνωση των κρυφών strings από το secrets.xml
                                 String senderEmail = getString(R.string.sender_email);
                                 String senderPass = getString(R.string.email_app_password);
 
                                 sendEmailDirectly(userEmail, senderEmail, senderPass, service, currentSelectedDate[0], cleanTime);
                             }
-                            // ------------------------------------
                         })
                         .addOnFailureListener(e -> {
                             btnConfirmAppointment.setEnabled(true);
@@ -307,7 +428,6 @@ public class HomeActivity extends AppCompatActivity {
         else if (servicePos == 5) baseDuration = 20;
 
         boolean isEmergencyRequest = (servicePos == 5);
-
         int reqTotalMins = baseDuration + (isEmergencyRequest ? 0 : 20);
 
         int openTimeMins = 10 * 60;
@@ -410,7 +530,6 @@ public class HomeActivity extends AppCompatActivity {
         spinnerHours.setAdapter(hoursAdapter);
     }
 
-    // --- ΝΕΑ ΜΕΘΟΔΟΣ ΓΙΑ ΑΠΟΣΤΟΛΗ EMAIL ---
     private void sendEmailDirectly(String toEmail, String senderEmail, String senderPassword, String serviceName, String date, String time) {
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
