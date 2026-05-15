@@ -48,31 +48,61 @@
         android:fontFamily="@font/font4"
         android:textColorHint="#A0E8C6C6"
         android:textColor="#FFFFFF"
-        android:backgroundTint="#E8C6C6"
+        android:background="@null"
+        android:textCursorDrawable="@null"
         android:textSize="20sp"
         android:inputType="textEmailAddress"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/logoImage" />
 
-    <EditText
-        android:id="@+id/etPasswordLogin"
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#E8C6C6"
+        app:layout_constraintStart_toStartOf="@+id/etEmailLogin"
+        app:layout_constraintEnd_toEndOf="@+id/etEmailLogin"
+        app:layout_constraintBottom_toBottomOf="@+id/etEmailLogin" />
+
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/tilPasswordLogin"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
         android:layout_marginEnd="32dp"
         android:layout_marginTop="24dp"
-        android:padding="16dp"
-        android:hint="Password"
-        android:fontFamily="@font/font4"
-        android:textColorHint="#A0E8C6C6"
-        android:textColor="#FFFFFF"
-        android:backgroundTint="#E8C6C6"
-        android:textSize="20sp"
-        android:inputType="textPassword"
+        app:endIconMode="password_toggle"
+        app:endIconTint="#E8C6C6"
+        app:hintEnabled="false"
+        app:boxBackgroundMode="none"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etEmailLogin" />
+        app:layout_constraintTop_toBottomOf="@+id/etEmailLogin">
+
+        <EditText
+            android:id="@+id/etPasswordLogin"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="16dp"
+            android:hint="Password"
+            android:fontFamily="@font/font4"
+            android:textColorHint="#A0E8C6C6"
+            android:textColor="#FFFFFF"
+            android:background="@null"
+            android:textCursorDrawable="@null"
+            android:textSize="20sp"
+            android:inputType="textPassword" />
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <View
+        android:layout_width="0dp"
+        android:layout_height="1dp"
+        android:background="#E8C6C6"
+        app:layout_constraintStart_toStartOf="@+id/tilPasswordLogin"
+        app:layout_constraintEnd_toEndOf="@+id/tilPasswordLogin"
+        app:layout_constraintBottom_toBottomOf="@+id/tilPasswordLogin" />
+
 
     <Button
         android:id="@+id/btnLoginSubmit"
@@ -91,6 +121,6 @@
         app:backgroundTint="#000000"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/etPasswordLogin" />
+        app:layout_constraintTop_toBottomOf="@+id/tilPasswordLogin" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
