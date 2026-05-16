@@ -359,6 +359,9 @@ public class HomeActivity extends AppCompatActivity {
                 appointment.put("time", cleanTime);
                 appointment.put("duration", duration);
 
+                // Δημιουργούμε final μεταβλητή για να μπορεί να διαβαστεί σωστά μέσα στο lambda
+                final int finalDuration = duration;
+
                 db.collection("appointments").add(appointment).addOnSuccessListener(doc -> {
                     Toast.makeText(this, "Το ραντεβού έκλεισε επιτυχώς!", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
@@ -368,6 +371,38 @@ public class HomeActivity extends AppCompatActivity {
                                 "Επιβεβαίωση Ραντεβού - Kalypsw's Nails 💅",
                                 "Γεια σου!\n\nΤο ραντεβού σου επιβεβαιώθηκε με επιτυχία.\n\nΥπηρεσία: " + service + "\nΗμερομηνία: " + currentSelectedDate[0] + "\nΏρα: " + cleanTime + "\n\nΣε περιμένουμε!\nKalypsw's Nails");
                     }
+
+                    // --- ΕΔΩ ΠΡΟΣΤΕΘΗΚΕ Η INNOVATIVE ΛΕΙΤΟΥΡΓΙΑ ΤΟΥ ΗΜΕΡΟΛΟΓΙΟΥ ---
+                    new AlertDialog.Builder(HomeActivity.this, android.app.AlertDialog.THEME_DEVICE_DEFAULT_DARK)
+                            .setTitle("Προσθήκη στο Ημερολόγιο")
+                            .setMessage("Θέλετε να προσθέσετε το ραντεβού στο ημερολόγιο του κινητού σας;")
+                            .setPositiveButton("Ναι", (dialogInterface, i) -> {
+                                try {
+                                    SimpleDateFormat sdfCalendar = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
+                                    Date dateObj = sdfCalendar.parse(currentSelectedDate[0] + " " + cleanTime);
+
+                                    if (dateObj != null) {
+                                        long startTime = dateObj.getTime();
+                                        long endTime = startTime + (finalDuration * 60 * 1000L);
+
+                                        Intent calendarIntent = new Intent(Intent.ACTION_INSERT)
+                                                .setData(android.provider.CalendarContract.Events.CONTENT_URI)
+                                                .putExtra(android.provider.CalendarContract.EXTRA_EVENT_BEGIN_TIME, startTime)
+                                                .putExtra(android.provider.CalendarContract.EXTRA_EVENT_END_TIME, endTime)
+                                                .putExtra(android.provider.CalendarContract.Events.TITLE, "Ραντεβού: " + service + " 💅")
+                                                .putExtra(android.provider.CalendarContract.Events.DESCRIPTION, "Το προγραμματισμένο σου ραντεβού για " + service)
+                                                .putExtra(android.provider.CalendarContract.Events.EVENT_LOCATION, "Kalypsw's Nails Salon");
+
+                                        startActivity(calendarIntent);
+                                    }
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    Toast.makeText(HomeActivity.this, "Δεν ήταν δυνατή η πρόσβαση στο ημερολόγιο", Toast.LENGTH_SHORT).show();
+                                }
+                            })
+                            .setNegativeButton("Όχι", null)
+                            .show();
+                    // --- ΤΕΛΟΣ ΛΕΙΤΟΥΡΓΙΑΣ ΗΜΕΡΟΛΟΓΙΟΥ ---
                 });
             } else {
                 Toast.makeText(this, "Συμπλήρωσε όλα τα πεδία!", Toast.LENGTH_SHORT).show();
