@@ -1,6 +1,6 @@
 package auth.csd.kalypsws_nails;
 
-import android.content.Intent; // Προστέθηκε για τη μετάβαση
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -11,7 +11,6 @@ import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
-// Προσθήκη των βιβλιοθηκών Firebase
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -21,12 +20,18 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Οθόνη εγγραφής (Sign Up) νέου χρήστη.
+ * Διαχειρίζεται τη δημιουργία του λογαριασμού μέσω Firebase Authentication
+ * και την παράλληλη δημιουργία του προφίλ χρήστη στο Cloud Firestore.
+ */
 public class SignupActivity extends AppCompatActivity {
 
+    // Στοιχεία διεπαφής χρήστη (UI)
     private Button btnBackSignup, btnSignupSubmit;
     private EditText etUsernameSignup, etEmailSignup, etPasswordSignup, etConfirmPassword;
 
-    // Δήλωση των μεταβλητών Firebase
+    // Στιγμιότυπα υπηρεσιών της Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -36,11 +41,11 @@ public class SignupActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_signup);
 
-        // 1. Αρχικοποίηση Firebase
+        // Αρχικοποίηση των υπηρεσιών ταυτοποίησης και βάσης δεδομένων
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
-        // 2. Σύνδεση με τα στοιχεία του XML
+        // Διασύνδεση των μεταβλητών κώδικα με τα στοιχεία του Layout (XML)
         btnBackSignup = findViewById(R.id.btnBackSignup);
         btnSignupSubmit = findViewById(R.id.btnSignupSubmit);
         etUsernameSignup = findViewById(R.id.etUsernameSignup);
@@ -48,7 +53,7 @@ public class SignupActivity extends AppCompatActivity {
         etPasswordSignup = findViewById(R.id.etPasswordSignup);
         etConfirmPassword = findViewById(R.id.etConfirmPassword);
 
-        // Λειτουργία κουμπιού Back
+        // Λειτουργία επιστροφής στην προηγούμενη οθόνη (ακύρωση εγγραφής)
         btnBackSignup.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -56,65 +61,68 @@ public class SignupActivity extends AppCompatActivity {
             }
         });
 
-        // 3. Λειτουργία κουμπιού Sign Up (Εγγραφή) με σύνδεση Firebase
+        // Λειτουργία υποβολής φόρμας εγγραφής
         btnSignupSubmit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                // Άντληση και καθαρισμός δεδομένων (trimming) από τα πεδία εισαγωγής
                 String username = etUsernameSignup.getText().toString().trim();
                 String email = etEmailSignup.getText().toString().trim();
                 String pass = etPasswordSignup.getText().toString().trim();
                 String confPass = etConfirmPassword.getText().toString().trim();
 
-                // Έλεγχος αν τα πεδία είναι συμπληρωμένα
+                // Βασικός έλεγχος εγκυρότητας (Validation) για μη συμπληρωμένα πεδία
                 if (username.isEmpty() || email.isEmpty() || pass.isEmpty()) {
                     Toast.makeText(SignupActivity.this, "Παρακαλώ συμπληρώστε όλα τα πεδία!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Έλεγχος αν ταιριάζουν οι κωδικοί
+                // Επιβεβαίωση ορθής πληκτρολόγησης κωδικού
                 if (!pass.equals(confPass)) {
                     Toast.makeText(SignupActivity.this, "Τα passwords δεν ταιριάζουν!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // Έλεγχος μήκους κωδικού (το Firebase απαιτεί τουλάχιστον 6 χαρακτήρες)
+                // Έλεγχος ελάχιστου απαιτούμενου μήκους κωδικού από την πολιτική της Firebase
                 if (pass.length() < 6) {
                     Toast.makeText(SignupActivity.this, "Ο κωδικός πρέπει να είναι τουλάχιστον 6 χαρακτήρες!", Toast.LENGTH_SHORT).show();
                     return;
                 }
 
-                // ΒΗΜΑ Α: Δημιουργία Λογαριασμού στο Firebase Authentication
+                // Αίτημα δημιουργίας νέου χρήστη στο Firebase Authentication
                 mAuth.createUserWithEmailAndPassword(email, pass)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
-                                    // Αν η εγγραφή πετύχει, παίρνουμε το μοναδικό ID (UID) του χρήστη
+                                    // Ανάκτηση του μοναδικού αναγνωριστικού (UID) που δημιουργήθηκε για τον χρήστη
                                     String userId = mAuth.getCurrentUser().getUid();
 
-                                    // ΒΗΜΑ Β: Αποθήκευση του Username στο Cloud Firestore
+                                    // Δομή δεδομένων για το προφίλ του χρήστη
                                     Map<String, Object> user = new HashMap<>();
                                     user.put("username", username);
                                     user.put("email", email);
 
+                                    // Αποθήκευση του προφίλ στη συλλογή "users" του Firestore με κλειδί το UID
                                     db.collection("users").document(userId)
                                             .set(user)
                                             .addOnSuccessListener(aVoid -> {
                                                 Toast.makeText(SignupActivity.this, "Η εγγραφή ολοκληρώθηκε! Παρακαλώ συνδεθείτε.", Toast.LENGTH_LONG).show();
 
-                                                // ΑΛΛΑΓΗ: Αυτόματη μετάβαση στο LoginActivity
+                                                // Επιτυχής ροή: Ανακατεύθυνση στην οθόνη σύνδεσης
+                                                // και εκκαθάριση της στοίβας (back stack) ώστε ο χρήστης να μην μπορεί να γυρίσει πίσω
                                                 Intent intent = new Intent(SignupActivity.this, LoginActivity.class);
-                                                // Καθαρίζουμε το stack των οθονών
                                                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_NEW_TASK);
                                                 startActivity(intent);
 
-                                                finish(); // Κλείνει το SignupActivity
+                                                finish();
                                             })
                                             .addOnFailureListener(e -> {
+                                                // Διαχείριση σφάλματος κατά την εγγραφή στη βάση δεδομένων
                                                 Toast.makeText(SignupActivity.this, "Σφάλμα αποθήκευσης στη βάση: " + e.getMessage(), Toast.LENGTH_SHORT).show();
                                             });
                                 } else {
-                                    // Αν αποτύχει η εγγραφή στο Authentication (π.χ. το email υπάρχει ήδη)
+                                    // Διαχείριση σφάλματος κατά τη δημιουργία λογαριασμού (π.χ. το email υπάρχει ήδη)
                                     Toast.makeText(SignupActivity.this, "Σφάλμα εγγραφής: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
                                 }
                             }

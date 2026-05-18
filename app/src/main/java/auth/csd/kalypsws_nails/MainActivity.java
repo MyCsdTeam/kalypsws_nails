@@ -11,9 +11,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+/**
+ * Αρχική οθόνη (Entry Point) της εφαρμογής.
+ * Παρέχει στον χρήστη τις βασικές επιλογές πλοήγησης για σύνδεση, εγγραφή
+ * και ανακατεύθυνση στα μέσα κοινωνικής δικτύωσης του καταστήματος.
+ */
 public class MainActivity extends AppCompatActivity {
 
-    // Δήλωση των μεταβλητών για τα κουμπιά
+    // Στοιχεία διεπαφής χρήστη (UI)
     private Button btnLoginMain;
     private Button btnSignupMain;
 
@@ -23,50 +28,56 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        // Διαμόρφωση UI για εμφάνιση σε όλη την οθόνη (Edge-to-Edge)
+        // και προσαρμογή των περιθωρίων βάσει των system bars της συσκευής
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
 
-        // 1. Σύνδεση των μεταβλητών με τα κουμπιά του αρχείου activity_main.xml
-        // ΠΡΟΣΟΧΗ: Αν έχεις βάλει διαφορετικά id στο xml, άλλαξέ τα εδώ
+        // Διασύνδεση των μεταβλητών κώδικα με τα αντίστοιχα στοιχεία διεπαφής στο XML
         btnLoginMain = findViewById(R.id.btnLogin);
         btnSignupMain = findViewById(R.id.btnSignUp);
 
-        // 2. Λειτουργία (Λογική) για το κουμπί του Login
+        // Ορισμός ακροατή συμβάντων (Listener) για μετάβαση στην οθόνη ταυτοποίησης (Login)
         btnLoginMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Δημιουργία Intent για μετάβαση στο LoginActivity
                 Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
                 startActivity(loginIntent);
             }
         });
 
-        // 3. Λειτουργία (Λογική) για το κουμπί του Signup
+        // Ορισμός ακροατή συμβάντων (Listener) για μετάβαση στην οθόνη εγγραφής νέου χρήστη (Signup)
         btnSignupMain.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Δημιουργία Intent για μετάβαση στο SignupActivity
                 Intent signupIntent = new Intent(MainActivity.this, SignupActivity.class);
                 startActivity(signupIntent);
             }
         });
     }
 
+    /**
+     * Εξωτερική διασύνδεση.
+     * Ανακατευθύνει τον χρήστη στο επαγγελματικό προφίλ του καταστήματος στο Instagram.
+     * Προσπαθεί να ανοίξει την εγγενή εφαρμογή, διαφορετικά καταφεύγει σε χρήση browser.
+     */
     public void openInstagramProfile(View view) {
         String username = "kalypsws_nails";
+
+        // Δημιουργία Intent για προβολή (ACTION_VIEW) του συγκεκριμένου URI
         Uri uri = Uri.parse("http://instagram.com/_u/" + username);
         Intent likeIng = new Intent(Intent.ACTION_VIEW, uri);
 
-        // Προαιρετικά: Θέτει το πακέτο του Instagram για να ανοίξει κατευθείαν το app αν είναι εγκατεστημένο
+        // Στόχευση του συγκεκριμένου πακέτου για να ανοίξει απευθείας η εφαρμογή του Instagram
         likeIng.setPackage("com.instagram.android");
 
         try {
             startActivity(likeIng);
         } catch (android.content.ActivityNotFoundException e) {
-            // Αν δεν υπάρχει η εφαρμογή του Instagram, το ανοίγει στον browser
+            // Fallback μηχανισμός: Αν δεν υπάρχει η εφαρμογή εγκατεστημένη, άνοιγμα μέσω web browser
             startActivity(new Intent(Intent.ACTION_VIEW,
                     Uri.parse("http://instagram.com/" + username)));
         }

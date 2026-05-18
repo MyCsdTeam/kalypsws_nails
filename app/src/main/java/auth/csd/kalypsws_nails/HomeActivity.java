@@ -51,11 +51,18 @@ import javax.mail.Transport;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 
+/**
+ * Η κύρια οθόνη (Home) της εφαρμογής για τους εγγεγραμμένους χρήστες (πελάτες).
+ * Διαχειρίζεται την προβολή του προφίλ, το κλείσιμο νέων ραντεβού,
+ * την προβολή ιστορικού και την ακύρωση υφιστάμενων ραντεβού.
+ */
 public class HomeActivity extends AppCompatActivity {
 
+    // Στοιχεία διεπαφής (UI)
     private TextView tvGreeting;
     private Button btnLogout, btnBookAppointment, btnMyAppointments;
 
+    // Εργαλεία Firebase
     private FirebaseAuth mAuth;
     private FirebaseFirestore db;
 
@@ -65,19 +72,23 @@ public class HomeActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_home);
 
+        // Αρχικοποίηση στοιχείων UI
         tvGreeting = findViewById(R.id.tvGreeting);
         btnLogout = findViewById(R.id.btnLogout);
         btnBookAppointment = findViewById(R.id.tvBookAppointment);
         btnMyAppointments = findViewById(R.id.btnMyAppointments);
 
+        // Προσθήκη υπογράμμισης (underline) στα κουμπιά για καλύτερη οπτική ένδειξη (UX)
         if (btnBookAppointment instanceof Button) {
             btnBookAppointment.setPaintFlags(btnBookAppointment.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
         }
         btnMyAppointments.setPaintFlags(btnMyAppointments.getPaintFlags() | Paint.UNDERLINE_TEXT_FLAG);
 
+        // Αρχικοποίηση στιγμιοτύπων Firebase
         mAuth = FirebaseAuth.getInstance();
         db = FirebaseFirestore.getInstance();
 
+        // Έλεγχος ταυτοποίησης χρήστη και άντληση ονόματος από το Firestore για προσωποποιημένο χαιρετισμό
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
             String uid = currentUser.getUid();
@@ -90,10 +101,12 @@ public class HomeActivity extends AppCompatActivity {
                         }
                     });
         } else {
+            // Ανακατεύθυνση στην οθόνη σύνδεσης αν η συνεδρία έχει λήξει
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();
         }
 
+        // Λειτουργία αποσύνδεσης χρήστη
         btnLogout.setOnClickListener(v -> {
             mAuth.signOut();
             Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
@@ -102,21 +115,28 @@ public class HomeActivity extends AppCompatActivity {
             finish();
         });
 
+        // Αντιστοίχιση ενεργειών στα βασικά κουμπιά
         btnBookAppointment.setOnClickListener(v -> showAppointmentDialog());
         btnMyAppointments.setOnClickListener(v -> showCancelAppointmentDialog());
     }
 
+    /**
+     * Εμφανίζει ένα δυναμικό παράθυρο διαλόγου με τα μελλοντικά ραντεβού του χρήστη.
+     * Επιτρέπει την επιλογή και ακύρωση ενός ραντεβού, εφόσον απομένουν περισσότερες από 24 ώρες.
+     */
     private void showCancelAppointmentDialog() {
         ProgressDialog loading = new ProgressDialog(this);
         loading.setMessage("Αναζήτηση ραντεβού...");
         loading.show();
 
+        // Ερώτημα (Query) στη βάση για τα ραντεβού του τρέχοντος χρήστη
         db.collection("appointments")
                 .whereEqualTo("userId", mAuth.getCurrentUser().getUid())
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     loading.dismiss();
 
+                    // Δυναμική κατασκευή του UI του AlertDialog μέσω κώδικα (programmatically)
                     AlertDialog.Builder builder = new AlertDialog.Builder(this, android.R.style.Theme_DeviceDefault_Dialog);
                     builder.setTitle("Τα Ραντεβού μου");
 
@@ -124,6 +144,7 @@ public class HomeActivity extends AppCompatActivity {
                     rootLayout.setOrientation(LinearLayout.VERTICAL);
                     rootLayout.setPadding(40, 40, 40, 40);
 
+                    // Προσθήκη ScrollView για περιπτώσεις πολλών ραντεβού
                     ScrollView scrollView = new ScrollView(this);
                     LinearLayout.LayoutParams scrollParams = new LinearLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT, 0, 1.0f);
@@ -135,6 +156,7 @@ public class HomeActivity extends AppCompatActivity {
 
                     rootLayout.addView(scrollView);
 
+                    // Ρύθμιση του κουμπιού ακύρωσης (Αρχικά απενεργοποιημένο)
                     Button btnCancelAction = new Button(this);
                     btnCancelAction.setText("Ακύρωση Επιλεγμένου Ραντεβού");
                     btnCancelAction.setAllCaps(false);
@@ -151,6 +173,7 @@ public class HomeActivity extends AppCompatActivity {
 
                     rootLayout.addView(btnCancelAction);
 
+                    // Πίνακες για διατήρηση της κατάστασης της επιλογής (λόγω lambda expressions)
                     final String[] selectedId = {null};
                     final String[] selectedInfo = {null};
                     final Date[] selectedDateObj = {null};
@@ -161,6 +184,7 @@ public class HomeActivity extends AppCompatActivity {
                     SimpleDateFormat fullSdf = new SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault());
                     long currentTime = System.currentTimeMillis();
 
+                    // Επεξεργασία των αποτελεσμάτων του Firestore
                     for (QueryDocumentSnapshot doc : queryDocumentSnapshots) {
                         String date = doc.getString("date");
                         String time = doc.getString("time");
@@ -169,9 +193,11 @@ public class HomeActivity extends AppCompatActivity {
 
                         try {
                             Date appDate = fullSdf.parse(date + " " + time);
+                            // Φιλτράρισμα: Εμφάνιση μόνο των μελλοντικών ραντεβού
                             if (appDate != null && appDate.getTime() > currentTime) {
                                 hasFutureAppointments = true;
 
+                                // Δημιουργία UI κάρτας για κάθε ραντεβού
                                 TextView tvApp = new TextView(this);
                                 tvApp.setText(service + "\n" + date + " | " + time);
                                 tvApp.setTextColor(Color.parseColor("#E8C6C6"));
@@ -195,6 +221,7 @@ public class HomeActivity extends AppCompatActivity {
                                 params.setMargins(0, 10, 0, 20);
                                 tvApp.setLayoutParams(params);
 
+                                // Λειτουργία επιλογής ραντεβού (Highlighting)
                                 tvApp.setOnClickListener(v -> {
                                     if (lastSelectedView[0] != null) {
                                         lastSelectedView[0].setBackground(normalBg);
@@ -218,6 +245,7 @@ public class HomeActivity extends AppCompatActivity {
                         } catch (Exception e) { e.printStackTrace(); }
                     }
 
+                    // Διαχείριση περίπτωσης χωρίς μελλοντικά ραντεβού
                     if (!hasFutureAppointments) {
                         TextView tvNo = new TextView(this);
                         tvNo.setText("Δεν έχετε κανένα προσεχές ραντεβού.");
@@ -233,6 +261,7 @@ public class HomeActivity extends AppCompatActivity {
                     builder.setNegativeButton("Κλείσιμο", (d, w) -> d.dismiss());
                     AlertDialog mainDialog = builder.create();
 
+                    // Λογική ελέγχου 24 ωρών και εκτέλεση διαγραφής
                     btnCancelAction.setOnClickListener(v -> {
                         long diffHours = (selectedDateObj[0].getTime() - System.currentTimeMillis()) / (60 * 60 * 1000);
                         if (diffHours < 24) {
@@ -240,6 +269,7 @@ public class HomeActivity extends AppCompatActivity {
                             return;
                         }
 
+                        // Επιβεβαίωση διαγραφής
                         new AlertDialog.Builder(this, android.app.AlertDialog.THEME_DEVICE_DEFAULT_DARK)
                                 .setTitle("Επιβεβαίωση Ακύρωσης")
                                 .setMessage("Είστε σίγουροι ότι θέλετε να ακυρώσετε το ραντεβού σας για:\n\n" + selectedInfo[0] + ";")
@@ -249,6 +279,8 @@ public class HomeActivity extends AppCompatActivity {
                                                 Toast.makeText(this, "Το ραντεβού ακυρώθηκε επιτυχώς.", Toast.LENGTH_LONG).show();
                                                 mainDialog.dismiss();
                                                 FirebaseUser user = mAuth.getCurrentUser();
+
+                                                // Αποστολή ενημερωτικού Email ακύρωσης
                                                 if (user != null && user.getEmail() != null) {
                                                     String subject = "Ακύρωση Ραντεβού - Kalypsw's Nails 💅";
                                                     String body = "Γεια σου!\n\nΤο ραντεβού σου ακυρώθηκε επιτυχώς.\n\n" +
@@ -272,6 +304,10 @@ public class HomeActivity extends AppCompatActivity {
                 });
     }
 
+    /**
+     * Εμφανίζει το παράθυρο διαλόγου για τη δημιουργία νέου ραντεβού.
+     * Περιλαμβάνει επιλογή υπηρεσίας, ημερομηνίας (CalendarView) και δυναμικό έλεγχο διαθέσιμων ωρών.
+     */
     private void showAppointmentDialog() {
         Dialog dialog = new Dialog(this);
         dialog.setContentView(R.layout.dialog_appointment);
@@ -279,6 +315,7 @@ public class HomeActivity extends AppCompatActivity {
             dialog.getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
             dialog.getWindow().setBackgroundDrawableResource(android.R.color.transparent);
         }
+
         Spinner spinnerService = dialog.findViewById(R.id.spinnerService);
         CalendarView calendarView = dialog.findViewById(R.id.calendarView);
         TextView tvSelectTimeLabel = dialog.findViewById(R.id.tvSelectTimeLabel);
@@ -286,20 +323,22 @@ public class HomeActivity extends AppCompatActivity {
         Button btnConfirmAppointment = dialog.findViewById(R.id.btnConfirmAppointment);
         Button btnEmergency = dialog.findViewById(R.id.btnEmergency);
 
+        // Περιορισμός ημερολογίου μόνο σε μελλοντικές ημερομηνίες
         calendarView.setMinDate(System.currentTimeMillis() - 1000);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault());
         final String[] currentSelectedDate = {sdf.format(new Date(calendarView.getDate()))};
 
+        // Λίστα διαθέσιμων υπηρεσιών
         String[] services = {"Επίλεξε Υπηρεσία...", "Gel Επιμήκυνση (2 ώρες)", "Ακρυλικό Επιμήκυνση (2 ώρες)", "Συντήρηση (1.5 ώρα)", "Ημιμόνιμο (1 ώρα)", "Σπασμένο Νύχι SOS (20 λεπτά)"};
 
-        // --- Custom Styling για το Υπηρεσία Spinner ---
+        // Προσαρμοσμένος Adapter (Custom Styling) για το Spinner Υπηρεσιών
         ArrayAdapter<String> serviceAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, services) {
             @Override
             public View getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
-                view.setBackgroundColor(Color.parseColor("#151515")); // Σκούρο φόντο
+                view.setBackgroundColor(Color.parseColor("#151515"));
                 TextView tv = (TextView) view;
-                tv.setPadding(40, 40, 40, 40); // Κενά γύρω γύρω
+                tv.setPadding(40, 40, 40, 40);
                 tv.setTextSize(16);
 
                 if (position == 0) {
@@ -319,15 +358,17 @@ public class HomeActivity extends AppCompatActivity {
                 if (position == 0) {
                     tv.setTextColor(Color.GRAY);
                 } else {
-                    tv.setTextColor(Color.parseColor("#FF66B2")); // Έντονο ροζ όταν έχει επιλεγεί
+                    tv.setTextColor(Color.parseColor("#FF66B2"));
                 }
                 return view;
             }
         };
         spinnerService.setAdapter(serviceAdapter);
 
+        // Συντόμευση για άμεση επιλογή υπηρεσίας "SOS"
         btnEmergency.setOnClickListener(v -> spinnerService.setSelection(5));
 
+        // Ακροατής επιλογής υπηρεσίας για δυναμική ενημέρωση των ωρών
         spinnerService.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 loadAvailableHoursFromFirebase(currentSelectedDate[0], position, spinnerHours, tvSelectTimeLabel);
@@ -335,6 +376,7 @@ public class HomeActivity extends AppCompatActivity {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        // Ακροατής αλλαγής ημερομηνίας
         calendarView.setOnDateChangeListener((view, year, month, dayOfMonth) -> {
             Calendar calendar = Calendar.getInstance();
             calendar.set(year, month, dayOfMonth);
@@ -342,16 +384,25 @@ public class HomeActivity extends AppCompatActivity {
             loadAvailableHoursFromFirebase(currentSelectedDate[0], spinnerService.getSelectedItemPosition(), spinnerHours, tvSelectTimeLabel);
         });
 
+        // Επιβεβαίωση και αποθήκευση του ραντεβού
         btnConfirmAppointment.setOnClickListener(v -> {
             if (spinnerService.getSelectedItemPosition() > 0 && spinnerHours.getVisibility() == View.VISIBLE && spinnerHours.getSelectedItemPosition() > 0) {
                 String timeSelection = spinnerHours.getSelectedItem().toString();
+                // Αποτροπή αποθήκευσης αν ο χρήστης καταφέρει να επιλέξει δεσμευμένη ώρα
                 if (timeSelection.contains("Δεσμευμένο")) return;
+
                 String service = spinnerService.getSelectedItem().toString();
                 String cleanTime = timeSelection.split(" ")[0];
                 int duration = 0;
                 int pos = spinnerService.getSelectedItemPosition();
-                if (pos == 1 || pos == 2) duration = 120; else if (pos == 3) duration = 90; else if (pos == 4) duration = 60; else if (pos == 5) duration = 20;
 
+                // Υπολογισμός διάρκειας ραντεβού ανάλογα με την υπηρεσία
+                if (pos == 1 || pos == 2) duration = 120;
+                else if (pos == 3) duration = 90;
+                else if (pos == 4) duration = 60;
+                else if (pos == 5) duration = 20;
+
+                // Δημιουργία Map για αποστολή στο Firestore
                 Map<String, Object> appointment = new HashMap<>();
                 appointment.put("userId", mAuth.getCurrentUser().getUid());
                 appointment.put("service", service);
@@ -366,13 +417,15 @@ public class HomeActivity extends AppCompatActivity {
                     Toast.makeText(this, "Το ραντεβού έκλεισε επιτυχώς!", Toast.LENGTH_SHORT).show();
                     dialog.dismiss();
                     FirebaseUser user = mAuth.getCurrentUser();
+
+                    // Αποστολή ενημερωτικού Email επιβεβαίωσης
                     if (user != null && user.getEmail() != null) {
                         sendEmail(user.getEmail(), getString(R.string.sender_email), getString(R.string.email_app_password),
                                 "Επιβεβαίωση Ραντεβού - Kalypsw's Nails 💅",
                                 "Γεια σου!\n\nΤο ραντεβού σου επιβεβαιώθηκε με επιτυχία.\n\nΥπηρεσία: " + service + "\nΗμερομηνία: " + currentSelectedDate[0] + "\nΏρα: " + cleanTime + "\n\nΣε περιμένουμε!\nKalypsw's Nails");
                     }
 
-                    // --- ΕΔΩ ΠΡΟΣΤΕΘΗΚΕ Η INNOVATIVE ΛΕΙΤΟΥΡΓΙΑ ΤΟΥ ΗΜΕΡΟΛΟΓΙΟΥ ---
+                    // Ενσωμάτωση (Intent) για προσθήκη του ραντεβού στο τοπικό ημερολόγιο της συσκευής
                     new AlertDialog.Builder(HomeActivity.this, android.app.AlertDialog.THEME_DEVICE_DEFAULT_DARK)
                             .setTitle("Προσθήκη στο Ημερολόγιο")
                             .setMessage("Θέλετε να προσθέσετε το ραντεβού στο ημερολόγιο του κινητού σας;")
@@ -402,7 +455,6 @@ public class HomeActivity extends AppCompatActivity {
                             })
                             .setNegativeButton("Όχι", null)
                             .show();
-                    // --- ΤΕΛΟΣ ΛΕΙΤΟΥΡΓΙΑΣ ΗΜΕΡΟΛΟΓΙΟΥ ---
                 });
             } else {
                 Toast.makeText(this, "Συμπλήρωσε όλα τα πεδία!", Toast.LENGTH_SHORT).show();
@@ -411,9 +463,16 @@ public class HomeActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    /**
+     * Αντλεί από τη βάση δεδομένων τα κλεισμένα ραντεβού για τη συγκεκριμένη ημέρα
+     * και εντοπίζει τα κενά διαστήματα (διαθέσιμες ώρες).
+     */
     private void loadAvailableHoursFromFirebase(String dateStr, int servicePos, Spinner spinnerHours, TextView tvSelectTimeLabel) {
         if (servicePos == 0) { tvSelectTimeLabel.setVisibility(View.GONE); spinnerHours.setVisibility(View.GONE); return; }
-        tvSelectTimeLabel.setVisibility(View.VISIBLE); tvSelectTimeLabel.setText("Φόρτωση...");
+
+        tvSelectTimeLabel.setVisibility(View.VISIBLE);
+        tvSelectTimeLabel.setText("Φόρτωση...");
+
         db.collection("appointments").whereEqualTo("date", dateStr).get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 List<int[]> booked = new ArrayList<>();
@@ -422,6 +481,7 @@ public class HomeActivity extends AppCompatActivity {
                     Long dur = document.getLong("duration");
                     if (time != null) {
                         String[] p = time.split(":");
+                        // Μετατροπή της ώρας σε λεπτά της ημέρας για ευκολότερο έλεγχο επικαλύψεων (overlap)
                         int start = Integer.parseInt(p[0]) * 60 + Integer.parseInt(p[1]);
                         booked.add(new int[]{start, start + (dur != null ? dur.intValue() : 60)});
                     }
@@ -431,32 +491,39 @@ public class HomeActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * Υπολογίζει τις διαθέσιμες ώρες βάσει της διάρκειας της επιλεγμένης υπηρεσίας
+     * και ενημερώνει το Spinner εμφάνισης των ωρών.
+     */
     private void populateHoursSpinner(List<int[]> booked, int servicePos, Spinner spinnerHours, TextView tvSelectTimeLabel) {
         tvSelectTimeLabel.setText("3. Διαθέσιμες Ώρες:");
         spinnerHours.setVisibility(View.VISIBLE);
         List<String> hoursList = new ArrayList<>();
         hoursList.add("Επίλεξε Ώρα...");
 
-        int duration = 60; // Default
+        int duration = 60; // Προεπιλεγμένη διάρκεια
         if (servicePos == 1 || servicePos == 2) duration = 120;
         else if (servicePos == 3) duration = 90;
         else if (servicePos == 5) duration = 20;
 
+        // Έλεγχος ωραρίου από τις 10:00 (600 λεπτά) έως τις 18:00 (1080 λεπτά) ανά 30 λεπτά
         for (int m = 600; m + duration <= 1080; m += 30) {
             boolean overlap = false;
             for (int[] b : booked) {
+                // Έλεγχος εάν το διάστημα του νέου ραντεβού (m έως m+duration) συγκρούεται με υφιστάμενο
                 if (m < b[1] && b[0] < (m + duration)) { overlap = true; break; }
             }
             String t = String.format(Locale.getDefault(), "%02d:%02d", m / 60, m % 60);
             hoursList.add(overlap ? t + " (Δεσμευμένο)" : t + " (Διαθέσιμο)");
         }
 
-        // --- Custom Styling για το Ώρες Spinner ---
+        // Προσαρμοσμένος Adapter για το Spinner των Ωρών
         ArrayAdapter<String> hoursAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, hoursList) {
             @Override
             public boolean isEnabled(int position) {
                 if (position == 0) return false;
-                return !getItem(position).contains("Δεσμευμένο"); // Απενεργοποιούμε το κλικ στα δεσμευμένα
+                // Απενεργοποίηση της δυνατότητας κλικ στα δεσμευμένα χρονικά διαστήματα
+                return !getItem(position).contains("Δεσμευμένο");
             }
 
             @Override
@@ -471,11 +538,11 @@ public class HomeActivity extends AppCompatActivity {
                     tv.setTextColor(Color.GRAY);
                     tv.setPaintFlags(tv.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                 } else if (getItem(position).contains("Δεσμευμένο")) {
-                    tv.setTextColor(Color.parseColor("#FF4C4C")); // Κόκκινο
-                    tv.setPaintFlags(tv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG); // Γραμμή διαγραφής!
+                    tv.setTextColor(Color.parseColor("#FF4C4C")); // Κόκκινο χρώμα για τα μη διαθέσιμα
+                    tv.setPaintFlags(tv.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG); // Προσθήκη γραμμής διαγραφής
                 } else {
-                    tv.setTextColor(Color.parseColor("#4CFF4C")); // Πράσινο
-                    tv.setPaintFlags(tv.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG)); // Αφαίρεση γραμμής
+                    tv.setTextColor(Color.parseColor("#4CFF4C")); // Πράσινο χρώμα για τα διαθέσιμα
+                    tv.setPaintFlags(tv.getPaintFlags() & (~Paint.STRIKE_THRU_TEXT_FLAG));
                 }
                 return view;
             }
@@ -489,7 +556,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (position == 0) {
                     tv.setTextColor(Color.GRAY);
                 } else {
-                    tv.setTextColor(Color.parseColor("#FF66B2")); // Έντονο ροζ όταν έχει επιλεγεί
+                    tv.setTextColor(Color.parseColor("#FF66B2"));
                 }
                 return view;
             }
@@ -498,7 +565,11 @@ public class HomeActivity extends AppCompatActivity {
         spinnerHours.setAdapter(hoursAdapter);
     }
 
+    /**
+     * Υπηρεσία αποστολής Email στο παρασκήνιο (Background Thread) χρησιμοποιώντας το JavaMail API.
+     */
     private void sendEmail(String to, String sender, String pass, String sub, String body) {
+        // Χρήση ExecutorService για αποφυγή μπλοκαρίσματος του κεντρικού UI Thread (NetworkOnMainThreadException)
         ExecutorService executor = Executors.newSingleThreadExecutor();
         executor.execute(() -> {
             try {
@@ -507,16 +578,21 @@ public class HomeActivity extends AppCompatActivity {
                 props.put("mail.smtp.starttls.enable", "true");
                 props.put("mail.smtp.host", "smtp.gmail.com");
                 props.put("mail.smtp.port", "587");
+
                 Session session = Session.getInstance(props, new Authenticator() {
                     protected PasswordAuthentication getPasswordAuthentication() { return new PasswordAuthentication(sender, pass); }
                 });
+
                 Message message = new MimeMessage(session);
                 message.setFrom(new InternetAddress(sender, "Kalypsw's Nails"));
                 message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
                 message.setSubject(sub);
                 message.setText(body);
+
                 Transport.send(message);
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         });
     }
 }
