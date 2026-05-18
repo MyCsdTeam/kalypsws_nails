@@ -34,4 +34,4 @@ To safeguard production endpoints and keep the codebase clean, a strict `.gitign
     * `google-services.json`: Contains private Firebase infrastructure IDs, API tokens, and cloud client parameters.
     * `**/secrets.xml`: A dedicated security file for local app credentials, merchant credentials, and custom private string resources.
 
-> [cite_start]⚠️ **Important for Developers:** Since `google-services.json` and `secrets.xml` are omitted from the repository for vital security reasons, you must obtain these active credential blocks directly from the project administrator and position them in their respective module pathways (e.g., inside the `/app` directory) before attempting to assemble a release version of the application
+> ⚠️ **Important for Developers:** Since `google-services.json` and `secrets.xml` are omitted from the repository for vital security reasons, you must obtain these active credential blocks directly from the project administrator and position them in their respective module pathways (e.g., inside the `/app` directory) before attempting to assemble a release version of the application
